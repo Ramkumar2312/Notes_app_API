@@ -29,12 +29,38 @@ def display_data():
     notes = cursor.fetchall()
     note_dict = {}
     for note in notes:
-        note_dict[note[0]] = note[1]
+        note_dict[note[0]] = note
     connection.close()
 
     return jsonify(note_dict)
 
+@app.route('/update',methods=['PUT'])
+def update_data():
+    data = request.get_json()
+    _id = data['id']
+    note = data['note']
+    connection = sqlite3.connect('notes.db')
+    cursor = connection.cursor()
+    update_data_query = "UPDATE notes SET note = ? WHERE id = ?"
+    cursor.execute(update_data_query,(note,_id))
+    connection.commit()
+    connection.close()
 
+    return jsonify({"message":"note updated"})
+
+
+@app.route('/delete',methods=['DELETE'])
+def delete_data():
+    data = request.get_json()
+    _id = data['id']
+    connection = sqlite3.connect('notes.db')
+    cursor = connection.cursor()
+    delete_note_query = "DELETE FROM notes WHERE id = ?"
+    cursor.execute(delete_note_query,(_id,))
+    connection.commit()
+    connection.close()
+
+    return jsonify({"message":"Note deleted"})
 
 
 
