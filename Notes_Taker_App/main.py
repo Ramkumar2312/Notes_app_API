@@ -1,8 +1,13 @@
 from flask import Flask,request
 from flask import jsonify
 import sqlite3
+from flask_jwt import JWT,jwt_required
+from security import authenticate,identity
 
 app = Flask(__name__)
+app.secret_key = "1234qwerty"
+
+jwt = JWT(app,authenticate,identity)
 
 @app.route('/')
 def home():
@@ -20,7 +25,10 @@ def add_data():
     connection.close()
     return f"Note : '{note}', added successfully"
 
+
+
 @app.route('/display',methods=['GET'])
+@jwt_required()
 def display_data():
     connection = sqlite3.connect('notes.db')
     cursor = connection.cursor()
@@ -31,8 +39,8 @@ def display_data():
     for note in notes:
         note_dict[note[0]] = note
     connection.close()
-
     return jsonify(note_dict)
+
 
 @app.route('/update',methods=['PUT'])
 def update_data():
@@ -45,7 +53,6 @@ def update_data():
     cursor.execute(update_data_query,(note,_id))
     connection.commit()
     connection.close()
-
     return jsonify({"message":"note updated"})
 
 
@@ -59,12 +66,19 @@ def delete_data():
     cursor.execute(delete_note_query,(_id,))
     connection.commit()
     connection.close()
-
     return jsonify({"message":"Note deleted"})
 
 
-
-
+@app.route('/user_register',methods=['POST'])
+def user_register():
+    data = request.get_json()
+    connection = sqlite3.connect('notes.db')
+    cursor = connection.cursor()
+    user_insert = "INSERT INTO users (username,password) VALUES (? ,?)"
+    cursor.execute(user_insert, (data['username'], data['password']))
+    connection.commit()
+    connection.close()
+    return jsonify({"message": "user added successfully "})
 
 
 if __name__ == '__main__':

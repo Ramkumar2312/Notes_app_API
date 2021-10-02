@@ -9,5 +9,11 @@ create_table_notes = "CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY, 
 
 cursor.execute(create_table_notes)
 
+create_table_users = "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, " \
+                     "username TEXT," \
+                     "password TEXT)"
+
+cursor.execute(create_table_users)
+
 connection.commit()
 connection.close()
