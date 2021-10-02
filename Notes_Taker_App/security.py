@@ -39,7 +39,7 @@ class User:
         connection = sqlite3.connect('notes.db')
         cursor = connection.cursor()
         user_fetch_id = "SELECT * FROM users WHERE id= ?"
-        user = cursor.execute(user_fetch_id, (_id,)).fetchone()
+        user = cursor.execute(user_fetch_id, (_id)).fetchone()
         if user:
             user = User(user[0],user[1],user[2])
         else:
