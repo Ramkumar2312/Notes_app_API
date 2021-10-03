@@ -17,10 +17,11 @@ def home():
 def add_data():
     data = request.get_json()
     note = data['note']
+    user_id = data['user_id']
     connection = sqlite3.connect('notes.db')
     cursor = connection.cursor()
-    insert_data = "INSERT INTO notes(note) VALUES(?)"
-    cursor.execute(insert_data,(note,))
+    insert_data = "INSERT INTO notes(note,user_id) VALUES(?,?)"
+    cursor.execute(insert_data,(note,user_id))
     connection.commit()
     connection.close()
     return f"Note : '{note}', added successfully"
@@ -28,7 +29,7 @@ def add_data():
 
 
 @app.route('/display',methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def display_data():
     connection = sqlite3.connect('notes.db')
     cursor = connection.cursor()
@@ -80,6 +81,17 @@ def user_register():
     connection.close()
     return jsonify({"message": "user added successfully "})
 
+@app.route('/delete_user',methods=['DELETE'])
+def delete_user():
+    data = request.get_json()
+    _id = data['id']
+    connection = sqlite3.connect('notes.db')
+    cursor = connection.cursor()
+    delete_user_query = "DELETE FROM users WHERE id = ?"
+    cursor.execute(delete_user_query,(_id,))
+    connection.commit()
+    connection.close()
+    return jsonify({"message":"User deleted"})
 
 if __name__ == '__main__':
         app.run(port=5007,debug=True)
