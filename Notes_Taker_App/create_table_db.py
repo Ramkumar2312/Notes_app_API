@@ -8,7 +8,7 @@ create_table_notes = "CREATE TABLE IF NOT EXISTS notes \
                      "note TEXT ," \
                      "user_id INTEGER NOT NULL," \
                      "sqltime TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL," \
-                     "FOREIGN KEY (user_id) REFERENCES users (id) ON UPDATE CASCADE ON DELETE RESTRICT );"
+                     "FOREIGN KEY (user_id) REFERENCES users (id) ON UPDATE RESTRICT ON DELETE RESTRICT );"
 
 cursor.execute(create_table_notes)
 

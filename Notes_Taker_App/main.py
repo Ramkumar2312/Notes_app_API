@@ -20,9 +20,16 @@ def add_data():
     user_id = data['user_id']
     connection = sqlite3.connect('notes.db')
     cursor = connection.cursor()
-    insert_data = "INSERT INTO notes(note,user_id) VALUES(?,?)"
-    cursor.execute(insert_data,(note,user_id))
+    cursor.execute("PRAGMA foreign_keys = ON")
+    try :
+        insert_data = "INSERT INTO notes(note,user_id) VALUES(?,?)"
+        cursor.execute(insert_data,(note,user_id))
+    except Exception as e:
+        cursor.close()
+        connection.close()
+        return jsonify({'message':e.args})
     connection.commit()
+    cursor.close()
     connection.close()
     return f"Note : '{note}', added successfully"
 
@@ -33,12 +40,20 @@ def add_data():
 def display_data():
     connection = sqlite3.connect('notes.db')
     cursor = connection.cursor()
-    select_all = "SELECT * FROM notes"
-    cursor.execute(select_all)
+    cursor.execute("PRAGMA foreign_keys = ON")
+    try :
+        select_all = "SELECT * FROM notes"
+        cursor.execute(select_all)
+    except Exception as e:
+        cursor.close()
+        connection.close()
+        return jsonify({'message': e.args})
     notes = cursor.fetchall()
     note_dict = {}
     for note in notes:
         note_dict[note[0]] = note
+    connection.commit()
+    cursor.close()
     connection.close()
     return jsonify(note_dict)
 
@@ -50,9 +65,16 @@ def update_data():
     note = data['note']
     connection = sqlite3.connect('notes.db')
     cursor = connection.cursor()
-    update_data_query = "UPDATE notes SET note = ? WHERE id = ?"
-    cursor.execute(update_data_query,(note,_id))
+    cursor.execute("PRAGMA foreign_keys = ON")
+    try :
+        update_data_query = "UPDATE notes SET note = ? WHERE id = ?"
+        cursor.execute(update_data_query,(note,_id))
+    except Exception as e:
+        cursor.close()
+        connection.close()
+        return jsonify({'message': e.args})
     connection.commit()
+    cursor.close()
     connection.close()
     return jsonify({"message":"note updated"})
 
@@ -61,13 +83,43 @@ def update_data():
 def delete_data():
     data = request.get_json()
     _id = data['id']
+    user_id = data['user_id']
     connection = sqlite3.connect('notes.db')
     cursor = connection.cursor()
-    delete_note_query = "DELETE FROM notes WHERE id = ?"
-    cursor.execute(delete_note_query,(_id,))
+    cursor.execute("PRAGMA foreign_keys = ON")
+    try :
+        delete_note_query = "DELETE FROM notes WHERE id = ? and user_id = ?"
+        cursor.execute(delete_note_query,(_id,user_id))
+    except Exception as e:
+        cursor.close()
+        connection.close()
+        return jsonify({'message': e.args})
     connection.commit()
+    cursor.close()
     connection.close()
     return jsonify({"message":"Note deleted"})
+
+
+@app.route('/get_users',methods=['GET'])
+def get_users():
+    # data = request.get_json()
+    connection = sqlite3.connect('notes.db')
+    cursor = connection.cursor()
+    cursor.execute("PRAGMA foreign_keys = ON")
+    try :
+        select_all_users = "SELECT * FROM users"
+        cursor.execute(select_all_users)
+    except Exception as e:
+        cursor.close()
+        connection.close()
+        return jsonify({'message': e.args})
+    users = cursor.fetchall()
+    user_dict ={}
+    for user in users:
+        user_dict[user[0]] = user[1]
+    cursor.close()
+    connection.close()
+    return jsonify(user_dict)
 
 
 @app.route('/user_register',methods=['POST'])
@@ -75,9 +127,16 @@ def user_register():
     data = request.get_json()
     connection = sqlite3.connect('notes.db')
     cursor = connection.cursor()
-    user_insert = "INSERT INTO users (username,password) VALUES (? ,?)"
-    cursor.execute(user_insert, (data['username'], data['password']))
+    cursor.execute("PRAGMA foreign_keys = ON")
+    try :
+        user_insert = "INSERT INTO users (username,password) VALUES (? ,?)"
+        cursor.execute(user_insert, (data['username'], data['password']))
+    except Exception as e:
+        cursor.close()
+        connection.close()
+        return jsonify({'message': e.args})
     connection.commit()
+    cursor.close()
     connection.close()
     return jsonify({"message": "user added successfully "})
 
@@ -87,9 +146,16 @@ def delete_user():
     _id = data['id']
     connection = sqlite3.connect('notes.db')
     cursor = connection.cursor()
-    delete_user_query = "DELETE FROM users WHERE id = ?"
-    cursor.execute(delete_user_query,(_id,))
+    cursor.execute("PRAGMA foreign_keys = ON")
+    try :
+        delete_user_query = "DELETE FROM users WHERE id = ?"
+        cursor.execute(delete_user_query,(_id,))
+    except Exception as e:
+        cursor.close()
+        connection.close()
+        return jsonify({'message': e.args})
     connection.commit()
+    cursor.close()
     connection.close()
     return jsonify({"message":"User deleted"})
 
